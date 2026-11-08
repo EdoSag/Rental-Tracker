@@ -19,6 +19,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # Cache Gradle downloads between builds (fewer network failures, faster builds).
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-${{ runner.os }}-
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.9'
