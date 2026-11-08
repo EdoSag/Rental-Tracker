@@ -31,7 +31,7 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
-      - name: Test (sample data: 3 months, 4 tenants)
+      - name: Test with sample data (3 months, 4 tenants)
         run: flutter test
 
       - name: Set up release signing
