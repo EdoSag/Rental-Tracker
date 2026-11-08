@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models.dart';
 import '../state.dart';
+import 'reading_sheet.dart';
 
 /// Meter screenshots for one tenant/month: add from gallery or camera,
 /// thumbnails, tap to zoom, delete.
@@ -19,7 +20,9 @@ class PhotoStrip extends StatelessWidget {
           ? await picker.pickMultiImage(imageQuality: 85)
           : [if (await picker.pickImage(source: ImageSource.camera, imageQuality: 85) case final f?) f];
       for (final f in files) {
-        await state.addPhoto(month, tenant, f.path);
+        final saved = await state.addPhoto(month, tenant, f.path);
+        // Read the meter value from the new photo and offer to fill it in.
+        if (context.mounted) await showReadingFromPhoto(context, state, month, tenant, saved);
       }
     } catch (e) {
       if (context.mounted) {
@@ -51,6 +54,7 @@ class PhotoStrip extends StatelessWidget {
         onDelete: (ph) async {
           await _confirmDelete(context, ph);
         },
+        onScan: (c, ph) => showReadingFromPhoto(c, state, month, tenant, state.photoFile(ph).path),
       ),
     ));
   }
@@ -121,7 +125,9 @@ class _PhotoViewer extends StatefulWidget {
   final List<Photo> photos;
   final int initial;
   final Future<void> Function(Photo) onDelete;
-  const _PhotoViewer({required this.state, required this.photos, required this.initial, required this.onDelete});
+  final Future<void> Function(BuildContext, Photo) onScan;
+  const _PhotoViewer(
+      {required this.state, required this.photos, required this.initial, required this.onDelete, required this.onScan});
 
   @override
   State<_PhotoViewer> createState() => _PhotoViewerState();
@@ -140,6 +146,11 @@ class _PhotoViewerState extends State<_PhotoViewer> {
         foregroundColor: Colors.white,
         title: Text('${_index + 1} / ${widget.photos.length}'),
         actions: [
+          IconButton(
+            tooltip: 'זהה קריאה מהתמונה',
+            icon: const Icon(Icons.document_scanner_outlined),
+            onPressed: () => widget.onScan(context, widget.photos[_index]),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () async {

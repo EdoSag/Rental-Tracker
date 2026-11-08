@@ -121,7 +121,8 @@ class AppState extends ChangeNotifier {
 
   File photoFile(Photo ph) => File(p.join(photosDir.path, ph.fileName));
 
-  Future<void> addPhoto(String month, int tenant, String sourcePath) async {
+  /// Copies the image into app storage and returns the stored file's path.
+  Future<String> addPhoto(String month, int tenant, String sourcePath) async {
     final ext = p.extension(sourcePath).isEmpty ? '.jpg' : p.extension(sourcePath);
     final name = '${month}_t${tenant}_${DateTime.now().microsecondsSinceEpoch}$ext';
     await File(sourcePath).copy(p.join(photosDir.path, name));
@@ -131,6 +132,7 @@ class AppState extends ChangeNotifier {
     final id = await _db.addPhoto(ph);
     _photos.add(Photo(id: id, month: month, tenant: tenant, fileName: name));
     notifyListeners();
+    return p.join(photosDir.path, name);
   }
 
   Future<void> deletePhoto(Photo ph) async {
