@@ -89,7 +89,7 @@ class _TenantCard extends StatelessWidget {
         const SizedBox(height: 12),
         meter('מים', result.water, 'מ"ק', false),
         const SizedBox(height: 12),
-        Row(children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
             child: NumField(
               label: 'ארנונה (₪)',
